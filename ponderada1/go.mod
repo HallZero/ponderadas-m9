@@ -1,4 +1,4 @@
-module p1/pub-sub
+module mqtt/src
 
 go 1.18
 

@@ -1,4 +1,3 @@
-
 # Ponderada 1 - Simulador de dispositivos IoT
 
 ## 1. Objetivo
@@ -28,25 +27,25 @@ Para utilizar os módulos, clone o repositório, se ainda não o tiver feito e e
     cd ponderadas-m9/ponderada1
 ```
 
-
-
 ### Publisher:
+
 1. Entre no diretório _publisher_:
-   
+
    ```bash
-   cd publisher 
+   cd publisher
    ```
 
 2. Rode o comando:
-   
+
    ```bash
    go run publisher.go
    ```
 
 ### Subscriber:
+
 1. Entre no diretório _subscriber_:
-    ```bash
-    cd subscriber
+   ```bash
+   cd subscriber
    ```
 2. Rode o comando:
    ```bash
@@ -54,33 +53,42 @@ Para utilizar os módulos, clone o repositório, se ainda não o tiver feito e e
    ```
 
 ## Publisher
-  
+
 Para permitir a criação de diversas instâncias no contexto de simulação, foi pensado em uma estrutura de dados que pudesse representar clientes MQTT como sensores que enviassem suas leituras como dados.
 
 ```go
 type Sensor struct {
-	name        string
-	latitude    float64
-	longitude   float64
-	measurement float64
-	rate        int
-	mqtt.Client
+	Name        string
+	Latitude    float64
+	Longitude   float64
+	Measurement float64
+	Rate        int
+	Unit        string
 }
 ```
 
 A partir dessa estrutura, pode-se criar instâncias que se conectam com um broker (nesse código, optou-se por utilizar o hivemq) e publicam suas leituras no tópico 'sensor/NomeDoSensor'. Para simular as leituras, gerou-se números aleatórios.
 
 ```go
-topic := "sensors/" + sensor.name
-
 for {
-    sensor.measurement = rand.Float64()*5
-    payload := strconv.FormatFloat(sensor.measurement, 'f', 2, 64)
-    token := sensor.Publish(topic, 0, false, payload)
-    token.Wait()
-    fmt.Printf("Published message: %s\n", payload)
-    time.Sleep(time.Duration(sensor.rate) * time.Second)
-}
+		for _, sensor := range sensors {
+
+			topic := "sensors/" + sensor.Name
+
+			sensor.Measurement = (rand.Float64() * (maxSensorRange - minSensorRange)) + minSensorRange
+
+			payload, _ := sensor.ToJSON()
+
+			token := client.Publish(topic, 0, false, payload)
+
+			token.Wait()
+
+			fmt.Printf("Published message: %s\n", payload)
+
+			time.Sleep(time.Duration(sensor.Rate) * time.Second)
+
+		}
+	}
 ```
 
 ### Testes
@@ -88,20 +96,18 @@ for {
 Para assegurar que as instâncias dos sensores são criadas corretamente, utilizo uma função auxiliar que permite verificar a igualdade entre duas instâncias da estrutura. Se ambas forem iguais, o sensor foi criado corretamente.
 
 ```go
-func TestNewSensor(t *testing.T) {
-	t.Run("Create new Sensor", func(t *testing.T) {
-		sensor := NewSensor("Sensor1", 51.0, 0.0, 0.0, 60)
-		compare := Sensor{name: "Sensor1", latitude: 51.0, longitude: 0.0, measurement: 0.0, rate: 60}
+t.Run("Create new Sensor", func(t *testing.T) {
+		sensor := NewSensor("Sensor1", 51.0, 0.0, 0.0, 60, "μg/m³")
+		compare := &Sensor{Name: "Sensor1", Latitude: 51.0, Longitude: 0.0, Measurement: 0.0, Rate: 60, Unit: "μg/m³"}
 
-		if structFieldsEqual(sensor, compare) {
+		if !reflect.DeepEqual(sensor, compare) {
 			t.Errorf("The sensor was not created successfully...")
 		}
 	})
-}
 ```
 
 ## Subscriber
-  
+
 Da mesma forma, o subscriber conecta-se ao broker e subscreve-se em um tópico de interesse.
 
 ```go
@@ -116,4 +122,21 @@ select {}
 
 ### Testes
 
-🚧 WIP 🚧
+Para assegurar que as instâncias dos sensores conseguem se conectar ao broker, utilizo uma função auxiliar que permite verificar a conectividade.
+
+```go
+t.Run("Subscription to topic", func(t *testing.T) {
+		client := DefaultClient.CreateClient(DefaultClient.Broker, DefaultClient.IdSubscriber, DefaultClient.Handler)
+
+		if token := client.Connect(); token.Wait() && token.Error() != nil {
+			t.Error(token.Error())
+		}
+
+		if token := client.Subscribe("sensors/SPS30", 1, nil); token.Wait() && token.Error() != nil {
+			t.Error(token.Error())
+			return
+		}
+
+		t.Log("Subscribed successfully to Topic")
+	})
+```

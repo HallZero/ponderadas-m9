@@ -1,42 +1,49 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 )
 
-func structFieldsEqual(a, b interface{}) bool {
-	va := reflect.ValueOf(a)
-	vb := reflect.ValueOf(b)
-
-	if va.Kind() != reflect.Struct || vb.Kind() != reflect.Struct {
-		return false
-	}
-
-	if va.Type() != vb.Type() {
-		return false
-	}
-
-	numFields := va.NumField()
-	for i := 0; i < numFields; i++ {
-		fieldA := va.Field(i)
-		fieldB := vb.Field(i)
-
-		if !reflect.DeepEqual(fieldA.Interface(), fieldB.Interface()) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func TestNewSensor(t *testing.T) {
+func TestMain(t *testing.T) {
 	t.Run("Create new Sensor", func(t *testing.T) {
-		sensor := NewSensor("Sensor1", 51.0, 0.0, 0.0, 60)
-		compare := Sensor{name: "Sensor1", latitude: 51.0, longitude: 0.0, measurement: 0.0, rate: 60}
+		sensor := NewSensor("Sensor1", 51.0, 0.0, 0.0, 60, "μg/m³")
+		compare := &Sensor{Name: "Sensor1", Latitude: 51.0, Longitude: 0.0, Measurement: 0.0, Rate: 60, Unit: "μg/m³"}
 
-		if structFieldsEqual(sensor, compare) {
+		if !reflect.DeepEqual(sensor, compare) {
 			t.Errorf("The sensor was not created successfully...")
 		}
+	})
+
+	t.Run("Generating JSON file to payload", func(t *testing.T) {
+		sensor := NewSensor("SPS30", 51.0, 0.0, 0.0, 1, "μg/m³")
+
+		got, err := sensor.ToJSON()
+
+		var transformed map[string]interface{}
+
+		json.Unmarshal([]byte(got), &transformed)
+
+		if err != nil {
+			t.Errorf("Error generating JSON: %v", err)
+		}
+
+		want := map[string]interface{}{
+			"Name":        "SPS30",
+			"Latitude":    51.0,
+			"Longitude":   0.0,
+			"Measurement": 0.0,
+			"Rate":        1,
+			"Unit":        "μg/m³",
+		}
+
+
+		// May change this later. Map comparison is quite confusing (reflect.DeepEqual() returns false)
+		if !(fmt.Sprint(transformed) == fmt.Sprint(want)) {
+			t.Errorf("Unexpected JSON output.\nGot: %v\nWant: %v", transformed, want)
+		}
+
 	})
 }
