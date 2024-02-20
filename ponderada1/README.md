@@ -140,3 +140,6 @@ t.Run("Subscription to topic", func(t *testing.T) {
 		t.Log("Subscribed successfully to Topic")
 	})
 ```
+## Vídeo de demonstração
+
+[Simulador de dispositivos IoT](https://youtu.be/J5b6GMtt3Q8)
