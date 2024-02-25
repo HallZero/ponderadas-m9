@@ -1,8 +1,8 @@
-# Ponderada 1 - Simulador de dispositivos IoT
+# Ponderada 2 - Teste de um simulador de dispositivos IoT
 
 ## 1. Objetivo
 
-Criar um simulador de dispositivos IoT utilizando o protocolo MQTT através do uso da biblioteca Eclipse Paho.
+Criar testes para o simulador de dispositivos IoT utilizando o protocolo MQTT através do uso da biblioteca Eclipse Paho.
 
 ## 2. Enunciado
 
