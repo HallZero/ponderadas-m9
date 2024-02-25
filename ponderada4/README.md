@@ -87,3 +87,7 @@ Não foram modificados neste momento
 ## Vídeo de demonstração
 
 [Simulador de dispositivos IoT](https://youtu.be/IQjbnmZvMmI)
+
+Comparação entre o Tráfego de dados antes e após o vídeo:
+<img src="../static/Screenshot from 2024-02-25 14-41-00.png" />
+<img src="../static/Screenshot from 2024-02-25 14-39-17.png" />
