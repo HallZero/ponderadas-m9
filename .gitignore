@@ -21,3 +21,5 @@
 go.work
 
 .env
+pwfile
+*.db
