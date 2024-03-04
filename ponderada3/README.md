@@ -9,6 +9,7 @@ Este arquivo possui as perguntas para o README, bem como a execução do passo-a
 [MQTT com autenticação](https://youtu.be/_WaSBiV0XZA)
 
 
+
 > **Pergunta:** O que acontece se você utilizar o mesmo ClientID em outra máquina ou sessão do browser? Algum pilar do CIA Triad é violado com isso?
 
 Ao utilizar o ClientID em outra máquina ou sessão, a primeira conexão irá se desconectar. Pensando em um cenário em que essa informação é vazada, o pilar de Confidencialidade é violado, uma vez que esta informação deveria ser única.
@@ -23,10 +24,18 @@ No contexto de segurança, pensando que qualquer usuário pode publicar informa�
 
 > **Pergunta:** Tente simular uma violação do pilar de Confidencialidade.
 
+O Pilar de Confidencialidade no Triad CIA é referente ao critério de que apenas pessoas autorizadas possuam acesso à informações. Pensando nesse contexto, a interceptação dessa mensagem entre o publisher e o broker ou entre o broker e subscriber poderia ocorrer por um atacante utilizando ferramentas de captura de pacotes enquato eles são transmitidos pela rede (local ou internet), visto que no exemplo acima, não existe proteção ou criptografia (SSL/TLS).
+
+Imaginando um cenário hipotético em que utiliza-se o envio de dados de sensores localizados em uma região de uma metrópole para o monitoramento da saúde pública através da internet entre um publisher e um broker, poderiamos utilizar ferramentas populares como o **Wireshark** ou **tcpdump** para interceptar e analisar as informações de um payload que não é protegido com criptografia. Isso nos daria acesso ao conteúdos de mensagens que não necessariamente deveriam ser acessadas por terceiros sem autorização.
 
 > **Pergunta:** Tente simular uma violação do pilar de Integridade.
 
+Tendo em vista que o pilar de Integridade diz respeito à "Imacularidade" dos dados, isto é, a pureza no sentido de não violação do seu conteúdo, pode-se pensar em formas de infringir esse aspecto.
+
+Utilizando o mesmo contexto da resposta anterior, uma técnica que poderia ser utilizada para violar a Integridade da mensagem seria a estratégia de *Man-In-The-Middle (MitM)*, que justamente visa interceptar e modificar uma mensagem entre as duas partes legítimas. Poderiamos então capturar uma mensagem enviada pelo publisher e modificar seu payload com dados falsos utilizando **ettercap**.
 
 
 > **Pergunta:** Tente simular uma violação do pilar de Disponibilidade. **Esse tem um truque!**
+
+Mantendo a ideia do contexto anterior, uma possibilidade de ideia seria indisponibilizar o serviço a partir de uma sobrecarga forçada do sistema num ponto de falha crítico (nesse caso, o broker), configurando um *Denial of Service (DoS)*. Nessa estratégia, um número excessivo de publishers poderia ser criado de forma a afetar a disponibilidade do Broker ao publicar mais mensagens do que pode-se lidar. Poderiamos utilizar o **LOIC (Low Orbit Ion Cannon)** para coordenar um ataque, embora brokers MQTT sejam projetados para lidar com um grande número de dados e conexões.
 
