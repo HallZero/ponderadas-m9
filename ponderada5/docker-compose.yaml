@@ -4,10 +4,10 @@ services:
   metabase:
     image: metabase/metabase
     ports:
-      - "3001:3000"
+      - "3000:3000"
     volumes:
       - ./metabase-data:/metabase-data
-    container_name: metabasee
+    container_name: metabase
     networks:
       - my-network
 
@@ -15,7 +15,7 @@ services:
     image: mongodb/mongodb-community-server:6.0-ubi8
     ports:
       - "27017:27017"
-    container_name: mongodbb
+    container_name: mongodb
     networks:
       - my-network
 
